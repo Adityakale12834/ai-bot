@@ -5,18 +5,22 @@ import Chatbot from "../Chatbot";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchData } from "../../features/chats/dataSlice";
+import { Routes, Route } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import { useNavigate } from "react-router-dom";
 
 function ChatGrid() {
+  const navigate = useNavigate();
+  const theme = useSelector((state) => state.theme.theme);
   return (
-    <div className="flex">
+    <div className="flex flex-col">
       {/* Sidebar Toggle Button */}
       <button
         data-drawer-target="default-sidebar"
         data-drawer-toggle="default-sidebar"
         aria-controls="default-sidebar"
         type="button"
-        className="inline-flex items-center p-3 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden 
+        className=" p-3 text-sm bg-gray-900 text-gray-500 sm:hidden 
                hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 
                dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600 transition"
       >
@@ -39,18 +43,21 @@ function ChatGrid() {
       {/* Sidebar */}
       <aside
         id="default-sidebar"
-        className="fixed top-0 left-0 z-40 w-72 sm:w-80 h-screen bg-gray-900 text-white 
-               shadow-lg transition-transform -translate-x-full sm:translate-x-0"
+        className={`fixed top-0 left-0 z-40 w-72 sm:w-80 h-screen text-white 
+               shadow-lg transition-transform -translate-x-full sm:translate-x-0 ${
+                 theme === "dark" ? "bg-slate-900" : "bg-slate-300"
+               }`}
         aria-label="Sidebar"
       >
         <div
-          className="h-full px-6 py-10 overflow-y-auto bg-gray-900 dark:bg-gray-800 
+          className="h-full px-6 py-10 overflow-y-auto
                     border-r border-gray-700"
         >
           {/* New Chat Button */}
           <div className="mb-5">
             <button
               type="button"
+              onClick={() => navigate(`/chat/${uuidv4()}`)}
               className="w-full p-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white 
                      rounded-lg shadow-md hover:from-blue-700 hover:to-blue-900 
                      transition duration-300 ease-in-out"
@@ -78,7 +85,10 @@ function ChatGrid() {
 
       {/* Chatbot Section */}
       <div className="sm:ml-80 flex-1 min-h-screen bg-gray-100 border-l border-gray-300">
-        <Chatbot id={uuidv4()} />
+        {/* <Chatbot id={uuidv4()} /> */}
+        <Routes>
+          <Route path="/chat/:id" element={<Chatbot />} />
+        </Routes>
       </div>
     </div>
   );
@@ -88,6 +98,7 @@ export default ChatGrid;
 
 const UserList = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { items, status, error } = useSelector((state) => state.data);
   console.log(items);
 
@@ -104,9 +115,10 @@ const UserList = () => {
         <li key={user.id}>
           <button
             type="button"
-            className="w-full px-5 py-2 rounded-md bg-amber-700 cursor-pointer my-1"
+            onClick={() => navigate(`/chat/${user.id}`)}
+            className="w-full px-5 py-2 rounded-md bg-fuchsia-700 cursor-pointer my-1"
           >
-            {user.message.text}
+            {user.messages[0].text.text}
           </button>
         </li>
       ))}

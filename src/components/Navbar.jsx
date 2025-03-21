@@ -7,7 +7,7 @@ function Navbar() {
   const dispatch = useDispatch();
   return (
     <div
-      className={`flex gap-10 p-5 w-full text-2xl font-bold ${
+      className={`flex gap-10 p-5 w-full text-2xl font-bold border-b border-gray-50 ${
         theme === "light"
           ? "bg-slate-300 text-gray-600"
           : "bg-gray-800 text-white"
