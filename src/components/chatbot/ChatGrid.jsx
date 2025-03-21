@@ -100,10 +100,12 @@ const UserList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { items, status, error } = useSelector((state) => state.data);
-  console.log(items);
+  // console.log(items);
 
   useEffect(() => {
-    dispatch(fetchData());
+    if (items.length === 0) {
+      dispatch(fetchData());
+    }
   }, [dispatch]);
 
   if (status === "loading") return <p>Loading...</p>;
@@ -111,17 +113,25 @@ const UserList = () => {
 
   return (
     <ul>
-      {items.map((user) => (
-        <li key={user.id}>
-          <button
-            type="button"
-            onClick={() => navigate(`/chat/${user.id}`)}
-            className="w-full px-5 py-2 rounded-md bg-fuchsia-700 cursor-pointer my-1"
-          >
-            {user.messages[0].text.text}
-          </button>
-        </li>
-      ))}
+      {items.map((user) => {
+        // Find the first message in the session
+        const firstUserMessage = user.messages
+          .filter((msg) => msg.text.sender === "user") // Only user messages
+          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))[0]; // Sort by earliest timestamp // Get the first message
+        return (
+          firstUserMessage && ( // Ensure there's a user message
+            <li key={user.id}>
+              <button
+                type="button"
+                onClick={() => navigate(`/chat/${user.id}`)}
+                className="w-full px-5 py-2 rounded-md bg-fuchsia-700 cursor-pointer my-1"
+              >
+                {firstUserMessage.text.text} {/* Show only the first message */}
+              </button>
+            </li>
+          )
+        );
+      })}
     </ul>
   );
 };

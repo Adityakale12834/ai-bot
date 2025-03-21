@@ -11,7 +11,7 @@ import {
 } from "../features/chats/dataSlice";
 import { useParams } from "react-router-dom";
 
-const TypewriterText = ({ text, speed = 1000 }) => {
+const TypewriterText = ({ text, speed = 5 }) => {
   const [displayedText, setDisplayedText] = useState("");
   const indexRef = useRef(0);
 
@@ -106,7 +106,7 @@ export default function Chatbot() {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
+        .replace(/'/g, "");
 
     rawText = escapeHtml(rawText);
 
@@ -175,7 +175,7 @@ export default function Chatbot() {
     // Paragraphs (Ensure proper wrapping)
     rawText = rawText
       .split(/\n{2,}/) // Split by multiple newlines
-      .map((para) => `<p class="mb-2">${para.trim()}</p>`)
+      .map((para) => `<p>${para.trim()}</p>`)
       .join("\n");
 
     return rawText;
@@ -269,7 +269,7 @@ export default function Chatbot() {
                 }`}
               >
                 {msg.text.sender === "bot" && isLatestBotMessage ? (
-                  <TypewriterText text={msg.text.text} speed={20} />
+                  <TypewriterText text={msg.text.text} speed={5} />
                 ) : (
                   <span dangerouslySetInnerHTML={{ __html: msg.text.text }} />
                 )}

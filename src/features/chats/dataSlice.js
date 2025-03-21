@@ -17,11 +17,13 @@ export const fetchData = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const querySnapshot = await getDocs(collection(db, "chats"));
-      // console.log(
-      //   "Fetched data:",
-      //   querySnapshot.docs.map((doc) => doc.data())
-      // );
-      return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const fetchedData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      console.log("Fetched messages:", fetchedData); // Debugging output
+      return fetchedData;
     } catch (error) {
       console.error("Firestore fetch error:", error);
       return thunkAPI.rejectWithValue(error.message);
