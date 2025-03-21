@@ -36,7 +36,7 @@ const TypewriterText = ({ text, speed = 1000 }) => {
 
 export default function Chatbot() {
   const [messages, setMessages] = useState([
-    { sender: "bot", text: "Hello! How can I assist you today?" },
+    { text: { sender: "bot", text: "Hello! How can I assist you today?" } },
   ]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
@@ -44,11 +44,12 @@ export default function Chatbot() {
   const dataItems = useSelector((state) => state.selectedItem);
   // const { items, status, error } = useSelector((state) => state.data);
 
-  console.log("This is getDtata", dataItems);
+  // console.log("This is getDtata", dataItems);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
   const dispatch = useDispatch();
   const chatId = useParams();
+  const [data, setData] = useState("");
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -60,10 +61,12 @@ export default function Chatbot() {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMessage = { sender: "user", text: input };
+    const userMessage = { text: { sender: "user", text: input } };
     setMessages((prev) => [...prev, userMessage]);
     console.log(userMessage);
-    dispatch(handleChatMessage({ chatId, message: userMessage }));
+    dispatch(
+      handleChatMessage({ chatId, message: { sender: "user", text: input } })
+    );
     setInput("");
 
     try {
@@ -78,7 +81,7 @@ export default function Chatbot() {
         "Sorry, I couldn't process that.";
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", text: formatChatGPTResponse(botResponse) },
+        { text: { sender: "bot", text: formatChatGPTResponse(botResponse) } },
       ]);
       const msg = { sender: "bot", text: formatChatGPTResponse(botResponse) };
       dispatch(handleChatMessage({ chatId, message: msg }));
@@ -89,7 +92,7 @@ export default function Chatbot() {
       );
       setMessages((prev) => [
         ...prev,
-        { sender: "bot", text: "Oops! Something went wrong." },
+        { text: { sender: "bot", text: "Oops! Something went wrong." } },
       ]);
     }
   };
@@ -211,9 +214,25 @@ export default function Chatbot() {
     }
   };
 
-  // useEffect(() => {
-  //   dispatch(getDataById(chatId.id));
-  // }, [dispatch]);
+  useEffect(() => {
+    setMessages([]); // Clear previous messages before fetching new data
+    handleFetchData(chatId.id);
+  }, [dispatch, chatId.id]);
+  // console.log(data);
+
+  const handleFetchData = async (docId) => {
+    try {
+      const data = await dispatch(getDataById(docId)).unwrap();
+      console.log("Fetched data:", data);
+      if (data === false) {
+        console.log("No data found");
+      } else {
+        setMessages(data.messages);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error); // ✅ Will log "Document not found" if missing
+    }
+  };
 
   return (
     <div className={`flex flex-col h-screen shadow-lg`}>
@@ -227,7 +246,7 @@ export default function Chatbot() {
       >
         {messages.map((msg, index) => {
           const isLatestBotMessage =
-            msg.sender === "bot" && index === messages.length - 1;
+            msg.text.sender === "bot" && index === messages.length - 1;
           return (
             <motion.div
               key={index}
@@ -235,24 +254,24 @@ export default function Chatbot() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
               className={`flex text-white ${
-                msg.sender === "user" ? "justify-end" : "justify-start"
+                msg.text.sender === "user" ? "justify-end" : "justify-start"
               }`}
             >
               <div
                 className={`p-3 rounded-lg text-black ${
                   theme === "light"
-                    ? msg.sender === "user"
+                    ? msg.text.sender === "user"
                       ? "bg-fuchsia-700 text-white"
                       : "bg-gray-400"
-                    : msg.sender === "bot"
+                    : msg.text.sender === "bot"
                     ? "bg-fuchsia-700 text-white"
                     : "bg-gray-400"
                 }`}
               >
-                {msg.sender === "bot" && isLatestBotMessage ? (
-                  <TypewriterText text={msg.text} speed={20} />
+                {msg.text.sender === "bot" && isLatestBotMessage ? (
+                  <TypewriterText text={msg.text.text} speed={20} />
                 ) : (
-                  <span dangerouslySetInnerHTML={{ __html: msg.text }} />
+                  <span dangerouslySetInnerHTML={{ __html: msg.text.text }} />
                 )}
               </div>
             </motion.div>

@@ -17,10 +17,10 @@ export const fetchData = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const querySnapshot = await getDocs(collection(db, "chats"));
-      console.log(
-        "Fetched data:",
-        querySnapshot.docs.map((doc) => doc.data())
-      );
+      // console.log(
+      //   "Fetched data:",
+      //   querySnapshot.docs.map((doc) => doc.data())
+      // );
       return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
       console.error("Firestore fetch error:", error);
@@ -34,15 +34,17 @@ export const getDataById = createAsyncThunk(
   "data/getDataById",
   async (id, thunkAPI) => {
     try {
-      // console.log(id.id);
+      console.log(id);
       const docRef = doc(db, "chats", id);
       const docSnap = await getDoc(docRef);
+      // console.log(docSnap);
 
       if (docSnap.exists()) {
-        console.log(...docSnap.data());
+        // console.log(...docSnap.data());
+        // console.log("reached");
         return { id: docSnap.id, ...docSnap.data() };
       } else {
-        throw false;
+        return false;
       }
     } catch (error) {
       console.error("Firestore fetch by ID error:", error);
@@ -74,7 +76,7 @@ export const handleChatMessage = createAsyncThunk(
     try {
       const docRef = doc(db, "chats", chatId.id);
       const docSnap = await getDoc(docRef);
-
+      console.log(message);
       if (docSnap.exists()) {
         // Document exists → Append message
         await updateDoc(docRef, {
